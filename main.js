@@ -5,6 +5,10 @@ const PRODUCTS = [
     { id: 4, title: "Ergonomic Office Chair - Deluxe Series", price: 89.99, oldPrice: 119.99, discount: "-25%", image: "hero-img.png", category: "Home" },
     { id: 5, title: "High-Performance Gaming Laptop", price: 1299.99, oldPrice: 1499.99, discount: "-13%", image: "about-img.png", category: "Electronics" },
     { id: 6, title: "Stainless Steel Smart Kitchen Blender", price: 59.99, oldPrice: 79.99, discount: "-25%", image: "hero-img.png", category: "Home" },
+    { id: 7, title: "Boy's Cotton Casual Shirt", price: 24.99, oldPrice: 34.99, discount: "-28%", image: "hero-img.png", category: "Boy's Fashion" },
+    { id: 8, title: "Boy's Denim Jeans - Classic Fit", price: 29.99, oldPrice: 45.00, discount: "-33%", image: "about-img.png", category: "Boy's Fashion" },
+    { id: 9, title: "Girl's Summer Floral Dress", price: 34.99, oldPrice: 49.99, discount: "-30%", image: "hero-img.png", category: "Girl's Fashion" },
+    { id: 10, title: "Girl's Embroidered Party Wear", price: 45.00, oldPrice: 65.00, discount: "-31%", image: "about-img.png", category: "Girl's Fashion" },
 ];
 
 let cart = JSON.parse(localStorage.getItem('azeemCart')) || [];
@@ -20,21 +24,43 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cartOverlay').addEventListener('click', toggleCart);
     document.getElementById('productSearch').addEventListener('input', handleSearch);
 
+    // Category Filtering
+    document.querySelectorAll('.category-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const category = link.getAttribute('data-category');
+            
+            // Update active state
+            document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+
+            renderProducts('', category);
+        });
+    });
+
     // Initial animations
     gsap.from('.slide-content h2', { y: 20, opacity: 0, duration: 1, delay: 0.5 });
     gsap.from('.slide-content p', { y: 20, opacity: 0, duration: 1, delay: 0.7 });
 });
 
-function renderProducts(filter = '') {
+function renderProducts(filter = '', category = 'all') {
     const mainGrid = document.getElementById('mainProductGrid');
     const flashGrid = document.getElementById('flashSaleGrid');
 
-    const filteredProducts = PRODUCTS.filter(p =>
+    let filteredProducts = PRODUCTS.filter(p =>
         p.title.toLowerCase().includes(filter.toLowerCase())
     );
 
+    if (category !== 'all') {
+        filteredProducts = filteredProducts.filter(p => p.category === category);
+    }
+
     mainGrid.innerHTML = filteredProducts.map(p => createProductCard(p)).join('');
-    flashGrid.innerHTML = PRODUCTS.slice(0, 4).map(p => createProductCard(p)).join('');
+    
+    // Only update flash grid on initial load (or when filter/category is 'all')
+    if (filter === '' && category === 'all') {
+        flashGrid.innerHTML = PRODUCTS.slice(0, 4).map(p => createProductCard(p)).join('');
+    }
 }
 
 function createProductCard(product) {
